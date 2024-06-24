@@ -1,5 +1,168 @@
 # Minecraft More Mobs Mod
 
+## Getting Started
+
+Let's walk through the process of creating a simple Minecraft mod that increases enemy mob spawns using Kotlin and Gradle. We'll cover setting up the mod's structure, writing the necessary Kotlin code, and configuring your build files.
+
+### Step-by-Step Guide to Creating a Minecraft Mod
+
+#### 1. Project Structure
+
+Ensure your project structure is as follows:
+
+```
+minecraft-more-mobs-mod/
+├── build.gradle.kts
+├── settings.gradle.kts
+├── src/
+│   ├── main/
+│   │   ├── kotlin/
+│   │   │   └── com/
+│   │   │       └── example/
+│   │   │           └── MyMod.kt      // Main mod class
+│   │   └── resources/
+│   │       └── META-INF/
+│   │           └── mods.toml         // Mod metadata
+└── gradle/
+    └── wrapper/
+        ├── gradle-wrapper.jar
+        └── gradle-wrapper.properties
+```
+
+#### 2. Configure `build.gradle.kts`
+
+Edit your `build.gradle.kts` file to include the necessary dependencies and plugins for Minecraft Forge and Kotlin:
+
+```kotlin
+plugins {
+    kotlin("jvm") version "1.9.22"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.22"
+    id("net.minecraftforge.gradle") version "5.1.22"
+}
+
+group = "com.example"
+version = "1.0-SNAPSHOT"
+archivesBaseName = "more-mobs-mod"
+
+repositories {
+    mavenCentral()
+    maven(url = "https://files.minecraftforge.net/maven")
+}
+
+dependencies {
+    implementation(kotlin("stdlib-jdk8"))
+    minecraft("net.minecraftforge:forge:1.21-51.0.17")
+}
+
+minecraft {
+    mappings("official", "1.21")
+    runs {
+        client {
+            workingDirectory = project.file("run")
+            property("forge.logging.console.level", "info")
+        }
+        server {
+            workingDirectory = project.file("run")
+            property("forge.logging.console.level", "info")
+        }
+    }
+}
+
+tasks.withType<Jar> {
+    manifest {
+        attributes(mapOf("Implementation-Title" to project.name,
+                         "Implementation-Version" to project.version))
+    }
+}
+```
+
+#### 3. Create `mods.toml`
+
+Create a `mods.toml` file under `src/main/resources/META-INF/` with the following content:
+
+```toml
+modLoader="javafml"
+loaderVersion="[36,)"
+license="MIT"
+[[mods]]
+modId="moremobsmod"
+version="1.0"
+displayName="More Mobs Mod"
+description="A mod that increases the spawn rate of enemy mobs."
+```
+
+#### 4. Main Mod Class
+
+Create a `MyMod.kt` file under `src/main/kotlin/com/example/` with the following content:
+
+```kotlin
+package com.example
+
+import net.minecraftforge.common.MinecraftForge
+import net.minecraftforge.event.entity.EntityJoinWorldEvent
+import net.minecraftforge.eventbus.api.SubscribeEvent
+import net.minecraftforge.fml.common.Mod
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext
+
+@Mod("moremobsmod")
+class MyMod {
+    init {
+        // Register the setup method for mod loading
+        FMLJavaModLoadingContext.get().modEventBus.addListener(this::setup)
+        FMLJavaModLoadingContext.get().modEventBus.addListener(this::doClientStuff)
+        MinecraftForge.EVENT_BUS.register(this)
+    }
+
+    private fun setup(event: FMLCommonSetupEvent) {
+        // Pre-initialization code
+    }
+
+    private fun doClientStuff(event: FMLClientSetupEvent) {
+        // Client-side initialization code
+    }
+
+    @SubscribeEvent
+    fun onEntitySpawn(event: EntityJoinWorldEvent) {
+        // Increase spawn rate logic
+        val entity = event.entity
+        if (entity.isMonster) {
+            // Example: double the spawn rate
+            entity.world.addEntity(entity)
+        }
+    }
+}
+```
+
+This code sets up a basic mod structure and includes a simple event handler to increase the spawn rate of enemy mobs.
+
+#### 5. Build and Run Your Mod
+
+1. **Build the Project:**
+
+```bash
+./gradlew build
+```
+
+2. **Run the Client:**
+
+```bash
+./gradlew runClient
+```
+
+3. **Test Your Mod:**
+
+- Launch Minecraft using the Forge profile.
+- Verify that enemy mobs are spawning at an increased rate as defined by your mod.
+
+### Additional Resources
+
+- **Forge Documentation:** [Minecraft Forge Documentation](https://mcforge.readthedocs.io/en/latest/)
+- **Kotlin Documentation:** [Kotlin Documentation](https://kotlinlang.org/docs/reference/)
+
+This should give you a good starting point for creating and testing your Minecraft mod that increases enemy mob spawns. If you encounter any issues or have specific questions, feel free to ask!
+
 Creating mods for Minecraft, especially when using TLauncher, involves several steps and a mix of Java programming and configuration through JSON files. Here's a detailed overview to get you started:
 
 ### Overview of Minecraft Modding
@@ -8,9 +171,9 @@ See the [Minecraft Forge documentation](https://docs.minecraftforge.net/en/lates
 
 1. **Set Up Your Development Environment:**
 
-   - **Install JDK:** Ensure you have the Java Development Kit (JDK) installed on your system.
-   - **IDE:** Use an Integrated Development Environment (IDE) like IntelliJ IDEA or Eclipse.
-   - **Minecraft Forge:** Download and set up Minecraft Forge, which provides a modding API for Minecraft.
+- **Install JDK:** Ensure you have the Java Development Kit (JDK) installed on your system.
+- **IDE:** Use an Integrated Development Environment (IDE) like IntelliJ IDEA or Eclipse.
+- **Minecraft Forge:** Download and set up Minecraft Forge, which provides a modding API for Minecraft.
 
 2. **Project Structure:**
 
@@ -321,7 +484,7 @@ This setup ensures that your Java Development Kit (JDK) installation is correctl
 ## Install Gradle
 
 ```bash
-brew install gradle
+brew install gradle && brew install kotlin
 ```
 
 Gradle itself is not an IDE but rather a build automation tool and dependency management system, commonly used for Java projects (including Minecraft mods). It helps automate the build process, manage dependencies, and execute tasks defined in your project's build script (`build.gradle`).
@@ -373,6 +536,25 @@ This command sets up a basic Java library project using Gradle.
 
 - VS Code supports running and debugging Java applications via the Java Debugger extension included in the Java Extension Pack.
 - Configure launch configurations (`launch.json`) for running your mod within Minecraft or testing it locally.
+
+### Get Kotlin Version
+
+```bash
+./gradlew kotlin --version
+
+------------------------------------------------------------
+Gradle 8.8
+------------------------------------------------------------
+
+Build time:   2024-05-31 21:46:56 UTC
+Revision:     4bd1b3d3fc3f31db5a26eecb416a165b8cc36082
+
+Kotlin:       1.9.22
+Groovy:       3.0.21
+Ant:          Apache Ant(TM) version 1.10.13 compiled on January 4 2023
+JVM:          22.0.1 (Oracle Corporation 22.0.1+8-16)
+OS:           Mac OS X 14.5 aarch64
+```
 
 ### Additional Notes
 

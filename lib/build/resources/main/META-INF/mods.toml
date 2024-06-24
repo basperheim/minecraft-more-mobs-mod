@@ -1,0 +1,8 @@
+modLoader="javafml"
+loaderVersion="[36,)"
+license="MIT"
+[[mods]]
+modId="moremobsmod"
+version="1.0"
+displayName="More Mobs Mod"
+description="A mod that increases the spawn rate of enemy mobs."
